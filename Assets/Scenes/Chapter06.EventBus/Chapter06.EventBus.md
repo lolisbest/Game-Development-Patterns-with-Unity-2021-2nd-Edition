@@ -1,4 +1,4 @@
-# 이벤트 버스로 게임 이벤트 관리하기
+# 6. 이벤트 버스로 게임 이벤트 관리하기
 
 ### 6.1 기술적 요구 사항
     
@@ -15,9 +15,24 @@
 - 이벤트 버스 패턴은 메시징 시스템과 발행/구독 패턴과 가까운 관계
 - 발행/구독 시스템이라고 부르는 것이 이벤트 버스가하는 일을 봤을 때 더 정확한 명칭
 - 이벤트 버스 패턴의 키워드는 버스(Bus)
-- 이벤트에서 발행/구독 모델을 사용하여 오브젝트를 연결하는 방법을 이벤트 버스
+- 이벤트에서 발행/구독 모델을 사용하여 오브젝트를 연결하는 방법을 이벤트 버스라고 함
+
+- 옵저버 및 기본 C# 이벤트와 같은 패턴으로 유사한 모델을 만들 수 있다.
+    - 단점 : 일반적인 옵저버 패턴 구현에서 옵저버(구독자)와 서브젝트(발행자)가 서로 의존하고 인식하여 강력한 결합을 발생.
+
+- 이벤트 버스와 게시자와 구독자 간 관계를 추상화 및 단순화하여 전혀 서로를 인식하지 못 한다.
+
+- 단 한줄의 코드로 게시자나 구독자 역할을 할당하는 과정을 줄일 수 있다
+> ???
 
 #### 6.2.1 이벤트 버스 패턴의 장단점
+- 분리 : 오브젝트를 분리한다는 점. 오브젝트는 직접 서로를 참조하는 대신 이벤트로 통신.
+- 단순성 : 이벤트 버스는 이벤트의 구독 혹은 게시 메커니즘을 추상화하여 단순성을 제공.
+
+- 성능 : 모든 이벤트 시스템의 내부에는 오브젝트 간 메시지를 관리하는 저수준 메커니즘이 있음. 따라서 이벤트 시스템을 사용할 때 약간의 성능 비용이 발생할 수 있음
+    > ???
+
+- 전역 : 
 
 #### 6.2.2 이벤트 버스를 사용하는 시기
 
@@ -45,7 +60,7 @@ namespace Chapter.EventBus
     {
         private static readonly IDictionary<RaceEventType, UnityEvent> Events = new Dictionary<RaceEventType, UnityEvent>();
 
-        public static void Subscribe(RaceEventType eventTYpe, UnityAction listener)
+        public static void Subscribe(RaceEventType eventType, UnityAction listener)
         {
             UnityEvent thisEvent;
 
@@ -61,7 +76,7 @@ namespace Chapter.EventBus
             }
         }
 
-        public static void Unsubscribe(RaceEventType eventTYpe, UnityAction listener)
+        public static void Unsubscribe(RaceEventType eventType, UnityAction listener)
         {
             UnityEvent thisEvent;
 
@@ -106,7 +121,7 @@ namespace Chapter.EventBus
 
         void OnDisable()
         {
-            RaceEventBus.Unsubscribe(RaceEventBus.COUNTDOWN, StartTimer);
+            RaceEventBus.Unsubscribe(RaceEventType.COUNTDOWN, StartTimer);
         }
 
         private void StartTimer()
@@ -124,7 +139,7 @@ namespace Chapter.EventBus
                 _currentTime--;
             }
 
-            RaceEventBus.Publish(RaceEventBus.START);
+            RaceEventBus.Publish(RaceEventType.START);
         }
 
         void OnGUI()
@@ -148,14 +163,14 @@ namespace Chapter.EventBus
 
         void OnEnable()
         {
-            RaceEventBus.Subscribe(RaceEventBus.START, StartBike);
-            RaceEventBus.Subscribe(RaceEventBus.STOP, StopBike);
+            RaceEventBus.Subscribe(RaceEventType.START, StartBike);
+            RaceEventBus.Subscribe(RaceEventType.STOP, StopBike);
         }
 
         void OnDisable()
         {
-            RaceEventBus.Unsubscribe(RaceEventBus.START, StartBike);
-            RaceEventBus.Unsubscribe(RaceEventBus.STOP, StopBike);
+            RaceEventBus.Unsubscribe(RaceEventType.START, StartBike);
+            RaceEventBus.Unsubscribe(RaceEventType.STOP, StopBike);
         }
 
         private void StartBike()
@@ -238,12 +253,12 @@ namespace Chapter.EventBus
 
         void OnEnable()
         {
-            RaceEventBus.Subscribe(RaceEventBus.STOP, Restart);
+            RaceEventBus.Subscribe(RaceEventType.STOP, Restart);
         }
 
         void OnDisable()
         {
-            RaceEventBus.Unsubscribe(RaceEventBus.STOP, Restart);
+            RaceEventBus.Unsubscribe(RaceEventType.STOP, Restart);
         }
 
         private void Restart()
@@ -258,7 +273,7 @@ namespace Chapter.EventBus
                 if (GUILayout.Button("Start Countdown"))
                 {
                     _isButtonEnabled = false;
-                    RaceEventBus.Publish(RaceEventBus.COUNTDOWN);
+                    RaceEventBus.Publish(RaceEventType.COUNTDOWN);
                 }
             }
         }
